@@ -6,8 +6,8 @@ import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import java.util.List;
 
 public class AvionRepository implements PanacheRepositoryBase<Avion, Long>
-    {
-        public List<Avion> findByOperator(String operatorParameter) {
-            return  find("operator", operatorParameter).list();
-        }
+{
+    public List<Avion> findByOperator(String operatorParameter) {
+        return  find("operator", operatorParameter).list();
     }
+}
