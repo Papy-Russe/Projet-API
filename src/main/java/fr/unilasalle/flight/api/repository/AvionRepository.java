@@ -1,7 +1,6 @@
 package fr.unilasalle.flight.api.repository;
 
 import fr.unilasalle.flight.api.beans.Avion;
-import fr.unilasalle.flight.api.resources.AvionResource;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 
 import java.util.List;
