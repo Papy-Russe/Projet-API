@@ -24,14 +24,15 @@ public class AvionResource extends GenericResources{
     @Inject
     Validator validator;
 
-    @GET
+    @GET//Récupérer la liste de tous les avions
     public Response getPlanes()
     {
         var list = repository.listAll();
         return getOr404(list);
     }
 
-    @GET
+    @GET//Récupérer la liste des avions par constructeur
+    @Path("/{operator}")
     public Response getPlanesByOp(@PathParam("operator") String operator)
     {
         List<Avion> list = new ArrayList<>();
@@ -42,7 +43,7 @@ public class AvionResource extends GenericResources{
         return getOr404(list);
     }
 
-    @GET
+    @GET//Récupérer les informations d'un avion en particulier
     @Path("/{id}")
     public Response getPlanes(@PathParam("id") Long id)
     {
@@ -51,7 +52,7 @@ public class AvionResource extends GenericResources{
          return getOr404(avion);
     }
 
-    @POST
+    @POST//Ajout d'un avion
     @Transactional
     public Response createPlane(Avion plane)
     {

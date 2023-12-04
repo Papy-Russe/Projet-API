@@ -20,11 +20,9 @@ public class Reservation extends PanacheEntityBase {
     @NotBlank(message = "Flight Id cannot be null")
     @ManyToOne//plusieurs réservations peuvent être associées à un seul vol
     @JoinColumn(name = "flight_id", referencedColumnName = "id")
-    @Column(nullable = false)
-    private long flight_id;
+    private Vol flight_id;
     @NotBlank(message = "Passenger Id cannot be null")
     @ManyToOne//plusieurs réservations peuvent être associées à un seul passager
     @JoinColumn(name = "passenger_id", referencedColumnName = "id")
-    @Column(nullable = false)
-    private long passenger_id;
+    private Passenger passenger_id;
 }

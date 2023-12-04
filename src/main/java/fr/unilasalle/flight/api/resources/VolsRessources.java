@@ -1,6 +1,7 @@
 package fr.unilasalle.flight.api.resources;
 
 import fr.unilasalle.flight.api.beans.Vol;
+import fr.unilasalle.flight.api.repository.AvionRepository;
 import fr.unilasalle.flight.api.repository.VolsRepository;
 import jakarta.inject.Inject;
 import jakarta.persistence.PersistenceException;
@@ -23,35 +24,39 @@ public class VolsRessources extends GenericResources{
     private VolsRepository repository;
 
     @Inject
+    private AvionRepository avionRepository;
+
+    @Inject
     Validator validator;
 
-    @GET
-    public Response getPlanes()
+    @GET//Récupérer la liste des vols
+    public Response getFlights()
     {
         var list = repository.listAll();
         return getOr404(list);
     }
 
-    @GET
-    public Response getFlightsByOp(@PathParam("operator") String operator)
+    @GET//Récupérer la liste des vols par destinations
+    @Path("/{destination}")
+    public Response getFlightsByDest(@PathParam("destination") String destination)
     {
         List<Vol> list = new ArrayList<>();
-        if(StringUtils.isBlank(operator))
+        if(StringUtils.isBlank(destination))
             list = repository.listAll();
         else
-            list = repository.findByOperator(operator);
+            list = repository.findByDestination(destination);
         return getOr404(list);
     }
     //RECHERCHE PAR ID
-    @GET
-    @Path("/id")
+    @GET//Récupérer la liste des vols par id
+    @Path("/{id}")
     public Response getFlights(@PathParam("id") Long id)
     {
         var vol = repository.findByIdOptional(id).orElse(null);
         return getOr404(vol);
     }
 
-    @POST
+    @POST//Ajouter un vol
     @Transactional
     public Response createFlights(Vol flight)
     {
@@ -59,6 +64,14 @@ public class VolsRessources extends GenericResources{
         if(!violations.isEmpty())
             return Response.status(400).entity(new ErrorWrapper(violations)).build();
 
+        var idAvion = flight.getPlane_id().getId();
+        var avion = avionRepository.findByIdOptional(idAvion).orElse(null);
+
+        if(avion != null){
+            flight.setPlane_id(avion);
+        }else{
+            // REVOYER UNE ERREUR
+        }
         try
         {
             repository.persistAndFlush(flight);

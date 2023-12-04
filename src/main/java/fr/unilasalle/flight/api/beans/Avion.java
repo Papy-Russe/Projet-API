@@ -1,6 +1,6 @@
 package fr.unilasalle.flight.api.beans;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CollectionIdJdbcTypeCode;
+
 @Entity
 @Getter
 @Setter
