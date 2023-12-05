@@ -49,7 +49,7 @@ public class VolsRessources extends GenericResources{
     }
     //RECHERCHE PAR ID
     @GET//Récupérer la liste des vols par id
-    @Path("/{id}")
+    @Path("/id/{id}")
     public Response getFlights(@PathParam("id") Long id)
     {
         var vol = repository.findByIdOptional(id).orElse(null);
@@ -70,7 +70,7 @@ public class VolsRessources extends GenericResources{
         if(avion != null){
             flight.setPlane_id(avion);
         }else{
-            // REVOYER UNE ERREUR
+            // RENVOYER UNE ERREUR
         }
         try
         {
@@ -79,5 +79,29 @@ public class VolsRessources extends GenericResources{
         }catch (PersistenceException e){
             return Response.serverError().entity(new ErrorWrapper(e.getMessage())).build();
         }
+    }
+
+    @DELETE
+    @Transactional
+    @Path("/{id}")
+    public Response deleteFlights(@PathParam("id") Long idFlight)
+    {
+        var violations = validator.validate(idFlight);
+        if(!violations.isEmpty())
+            return Response.status(400).entity(new ErrorWrapper(violations)).build();
+
+        var verifExistenceFlight = repository.findByIdOptional(idFlight).orElse(null);//recherche du vol
+
+        if(verifExistenceFlight != null)//si vol trouvé
+            try
+            {
+                repository.delete(verifExistenceFlight);//suppression du vol
+                return Response.status(200).build();//retour de la requête
+            }
+            catch (PersistenceException e) {
+                return Response.serverError().entity(new ErrorWrapper(e.getMessage())).build();//erreur
+            }
+        else
+            return getOr404(verifExistenceFlight);//le vol existe pas
     }
 }

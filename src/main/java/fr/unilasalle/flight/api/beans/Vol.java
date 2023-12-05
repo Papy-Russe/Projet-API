@@ -46,7 +46,7 @@ public class Vol extends PanacheEntityBase {
     @Column(nullable = false)
     private LocalTime arrival_time;
 
-    @NotBlank(message = "Plane Id cannot be null")
+    @NotNull(message = "Plane Id cannot be null")//avant c'était @NotBlank et ça fonctionnait pas
     @ManyToOne//plusieurs vols peuvent être associés à un seul avion
     @JoinColumn(name = "plane_id", referencedColumnName = "id")//jointure entre les 2 colonnes (paramétrage de la clé étrangère)
     private Avion plane_id;

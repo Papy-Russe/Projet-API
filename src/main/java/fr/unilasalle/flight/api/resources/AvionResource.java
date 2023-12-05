@@ -44,7 +44,7 @@ public class AvionResource extends GenericResources{
     }
 
     @GET//Récupérer les informations d'un avion en particulier
-    @Path("/{id}")
+    @Path("/id/{id}")
     public Response getPlanes(@PathParam("id") Long id)
     {
          var avion = repository.
