@@ -9,7 +9,12 @@ import java.util.List;
 @Model
 public class ReservationRepository implements PanacheRepositoryBase<Reservation, Long>
 {
-    public List<Reservation> findByOperator(String operatorParameter) {
-        return find("operator", operatorParameter).list();
+    public List<Reservation> findByFlights(String flightNumber) {
+        return find("flight_id.number", flightNumber).list();
+    }
+
+    @Override
+    public void persistAndFlush(Reservation reservation) {
+        PanacheRepositoryBase.super.persistAndFlush(reservation);
     }
 }

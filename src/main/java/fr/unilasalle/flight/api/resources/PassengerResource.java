@@ -68,4 +68,20 @@ public class PassengerResource extends GenericResources{
         }else
             return Response.status(404).entity(new ErrorWrapper("Passenger not found")).build();
     }
+
+    @POST//Ajouter un passager
+    @Transactional
+    public Response createPasssenger(Passenger passengerToCreate)
+    {
+        var violations = validator.validate(passengerToCreate);
+        if(!violations.isEmpty())
+            return Response.status(400).entity(new ErrorWrapper(violations)).build();
+
+        try{
+            repository.persistAndFlush(passengerToCreate);
+            return Response.status(201).build();
+        }catch (PersistenceException e){
+            return Response.serverError().entity(new ErrorWrapper(e.getMessage())).build();
+        }
+    }
 }

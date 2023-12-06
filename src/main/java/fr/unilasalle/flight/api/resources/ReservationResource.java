@@ -1,5 +1,6 @@
 package fr.unilasalle.flight.api.resources;
 
+import fr.unilasalle.flight.api.beans.Avion;
 import fr.unilasalle.flight.api.beans.Reservation;
 import fr.unilasalle.flight.api.repository.PassengerRepository;
 import fr.unilasalle.flight.api.repository.ReservationRepository;
@@ -46,6 +47,18 @@ public class ReservationResource extends GenericResources{
     {
         var reservation = repository.findByIdOptional(id).orElse(null);
         return getOr404(reservation);
+    }
+
+    @GET//Récupération de toutes les réservations sur un seul vol
+    @Path("/flight/{flight_id}")
+    public Response getReservationsByFlights(@PathParam("flight_id") String flight_number)
+    {
+        List<Reservation> list = new ArrayList<>();
+        if(StringUtils.isBlank(flight_number))
+            list = repository.listAll();
+        else
+            list = repository.findByFlights(flight_number);
+        return getOr404(list);
     }
 
     @POST//Ajouter une réservation
