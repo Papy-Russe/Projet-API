@@ -18,7 +18,7 @@ public class Passenger extends PanacheEntityBase {
     @SequenceGenerator(name = "passengers_sequence_inJavaCode", sequenceName ="passengers_sequence_database", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "passengers_sequence_inJavaCode")
     private long id;//clé primaire
-    @NotBlank(message = "Surname cannot be null")
+    @NotNull(message = "Surname cannot be null")
     @Column(nullable = false)
     private String surname;
     @NotNull(message = "First name cannot be null")

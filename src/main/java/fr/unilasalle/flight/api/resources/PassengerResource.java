@@ -3,6 +3,7 @@ package fr.unilasalle.flight.api.resources;
 import fr.unilasalle.flight.api.beans.Avion;
 import fr.unilasalle.flight.api.beans.Passenger;
 import fr.unilasalle.flight.api.repository.PassengerRepository;
+import fr.unilasalle.flight.api.repository.ReservationRepository;
 import jakarta.inject.Inject;
 import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
@@ -26,25 +27,14 @@ public class PassengerResource extends GenericResources{
     @Inject
     Validator validator;
 
-    @GET
+    @GET//récupération de tous les passagers
     public Response getPassenger()
     {
         var list = repository.listAll();
         return getOr404(list);
     }
 
-    @GET
-    public Response getPassengerByOp(@PathParam("operator") String operator)
-    {
-        List<Passenger> list = new ArrayList<>();
-        if(StringUtils.isBlank(operator))
-            list = repository.listAll();
-        else
-            list = repository.findByOperator(operator);
-        return getOr404(list);
-    }
-
-    @GET
+    @GET//récupération d'un passagers en particulier
     @Path("/{id}")
     public Response getPassenger(@PathParam("id") Long id)
     {
@@ -53,18 +43,29 @@ public class PassengerResource extends GenericResources{
         return getOr404(passenger);
     }
 
-    @POST
+    @PUT//Modifier un passager
+    @Path("/{id}")
     @Transactional
-    public Response createPassenger(Passenger passenger)
+    public Response updatePassenger(@PathParam("id") Long id, Passenger updatedPassenger)
     {
-        var violations = validator.validate(passenger);
+        var violations = validator.validate(id);
         if(!violations.isEmpty())
             return  Response.status(400).entity(new ErrorWrapper(violations)).build();
-        try
+
+        var passenger = repository.findByIdOptional(id).orElse(null);
+
+        if(passenger != null)
         {
-            repository.persistAndFlush(passenger);
-            return Response.status(201).build();
-        }catch (PersistenceException e){
-            return Response.serverError().entity(new ErrorWrapper(e.getMessage())).build();}
+            passenger.setFirstname(updatedPassenger.getFirstname());
+            passenger.setSurname(updatedPassenger.getSurname());
+            passenger.setEmailaddress(updatedPassenger.getEmailaddress());
+            try{
+                repository.persistAndFlush(passenger);
+                return Response.status(200).build();
+            }catch (PersistenceException e) {
+                return Response.serverError().entity(new ErrorWrapper(e.getMessage())).build();
+            }
+        }else
+            return Response.status(404).entity(new ErrorWrapper("Passenger not found")).build();
     }
 }

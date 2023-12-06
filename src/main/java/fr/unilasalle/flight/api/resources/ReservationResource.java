@@ -14,6 +14,7 @@ import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 
 
+import javax.imageio.plugins.jpeg.JPEGImageReadParam;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,5 +74,28 @@ public class ReservationResource extends GenericResources{
         }else{
             return Response.status(400).build();//mettre un vrai message d'erreur
         }
+    }
+
+    @DELETE
+    @Transactional
+    @Path("/{id}")
+    public Response deleteReservation(@PathParam("id") Long idReservation)
+    {
+        var violations = validator.validate(idReservation);
+        if(!violations.isEmpty())
+            return Response.status(400).entity(new ErrorWrapper(violations)).build();
+
+        var reservation = repository.findByIdOptional(idReservation).orElse(null);
+        if(reservation != null)//si le vol est trouvé
+        {
+            try{
+                repository.delete(reservation);//suppression de la réservation
+                return Response.status(200).build();//retour de la requête
+            }catch (PersistenceException e) {
+                return Response.serverError().entity(new ErrorWrapper(e.getMessage())).build();
+            }
+        }
+        else
+            return getOr404(reservation);//le vol existe pas
     }
 }
