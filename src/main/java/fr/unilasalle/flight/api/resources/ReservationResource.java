@@ -1,7 +1,9 @@
 package fr.unilasalle.flight.api.resources;
 
 import fr.unilasalle.flight.api.beans.Reservation;
+import fr.unilasalle.flight.api.repository.PassengerRepository;
 import fr.unilasalle.flight.api.repository.ReservationRepository;
+import fr.unilasalle.flight.api.repository.VolsRepository;
 import jakarta.inject.Inject;
 import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
@@ -24,40 +26,52 @@ public class ReservationResource extends GenericResources{
     @Inject
     private ReservationRepository repository;
     @Inject
+    private VolsRepository volsRepository;
+    @Inject
+    private PassengerRepository passengerRepository;
+    @Inject
     Validator validator;
 
-    @GET
+    @GET//Récupération de la liste de toutes les résertvations
     public Response getReservations()
     {
         var list = repository.listAll();
         return getOr404(list);
     }
 
-    @GET
-    public Response getReservationsByOp(@PathParam("operator") String operator)
+    @GET//Récuération d'une réservation en particule=ier en fonction de l'id
+    @Path("/{id}")
+    public Response getReservationsById(@PathParam("id") Long id)
     {
-        List<Reservation> list = new ArrayList<>();
-        if(StringUtils.isBlank(operator))
-            list = repository.listAll();
-        else
-            list = repository.findByOperator(operator);
-        return getOr404(list);
+        var reservation = repository.findByIdOptional(id).orElse(null);
+        return getOr404(reservation);
     }
 
-    @POST
+    @POST//Ajouter une réservation
     @Transactional
     public Response createReservations(Reservation reservation)
     {
         var violations = validator.validate(reservation);
         if(!violations.isEmpty())
             return Response.status(400).entity(new ErrorWrapper(violations)).build();
-        try
+
+        //vérification existence vol
+        var flight = volsRepository.findByIdOptional(reservation.getFlight_id().getId()).orElse(null);
+        //vérification existence passenger
+        var passenger = passengerRepository.findByIdOptional(reservation.getPassenger_id().getId()).orElse(null);
+
+        if(flight != null && passenger != null)
         {
-            repository.persistAndFlush(reservation);
-            return Response.status(201).build();
-        }
-        catch (PersistenceException e){
-            return Response.serverError().entity(new ErrorWrapper(e.getMessage())).build();
+            reservation.setFlight_id(flight);//Association d'un vol à la réservation
+            reservation.setPassenger_id(passenger);//Association d'un passager à la réservation
+            try{
+                repository.persistAndFlush(reservation);
+                return Response.status(201).build();
+            }catch (PersistenceException e){
+                return Response.serverError().entity(new ErrorWrapper(e.getMessage())).build();
+            }
+        }else{
+            return Response.status(400).build();//mettre un vrai message d'erreur
         }
     }
 }

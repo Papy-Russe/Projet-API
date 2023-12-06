@@ -3,6 +3,7 @@ package fr.unilasalle.flight.api.beans;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,10 +21,10 @@ public class Passenger extends PanacheEntityBase {
     @NotBlank(message = "Surname cannot be null")
     @Column(nullable = false)
     private String surname;
-    @NotBlank(message = "First name cannot be null")
+    @NotNull(message = "First name cannot be null")
     @Column(nullable = false)
     private String firstname;
-    @NotBlank(message = "E-mail address cannot be null")
+    @NotNull(message = "E-mail address cannot be null")
     @Column(nullable = false)
     private String emailaddress;
 }

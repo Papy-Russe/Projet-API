@@ -70,7 +70,7 @@ public class VolsRessources extends GenericResources{
         if(avion != null){
             flight.setPlane_id(avion);
         }else{
-            // RENVOYER UNE ERREUR
+            return Response.status(400).build();//mettre un vrai message d'erreur
         }
         try
         {
