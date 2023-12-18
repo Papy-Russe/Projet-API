@@ -1,7 +1,9 @@
 package fr.unilasalle.flight.api.resources;
 
 import fr.unilasalle.flight.api.beans.Avion;
+import fr.unilasalle.flight.api.beans.Passenger;
 import fr.unilasalle.flight.api.beans.Reservation;
+import fr.unilasalle.flight.api.repository.AvionRepository;
 import fr.unilasalle.flight.api.repository.PassengerRepository;
 import fr.unilasalle.flight.api.repository.ReservationRepository;
 import fr.unilasalle.flight.api.repository.VolsRepository;
@@ -74,15 +76,35 @@ public class ReservationResource extends GenericResources{
         //vérification existence passenger
         var passenger = passengerRepository.findByIdOptional(reservation.getPassenger_id().getId()).orElse(null);
 
-        if(flight != null && passenger != null)
+        if(passenger == null)//si le passager n'existe pas
         {
-            reservation.setFlight_id(flight);//Association d'un vol à la réservation
-            reservation.setPassenger_id(passenger);//Association d'un passager à la réservation
-            try{
-                repository.persistAndFlush(reservation);
-                return Response.status(201).build();
-            }catch (PersistenceException e){
-                return Response.serverError().entity(new ErrorWrapper(e.getMessage())).build();
+            Passenger p = reservation.getPassenger_id();//récupération des infos du passager
+            passenger = new Passenger();//nouveau passager
+            passenger.setFirstname(p.getFirstname());//transfert du prénom
+            passenger.setSurname(p.getSurname());//transfert du nom
+            passenger.setEmailaddress(p.getEmailaddress());//transfert de l'adresse mail
+            passengerRepository.persistAndFlush(passenger);//création du passager
+        }
+
+        if(flight != null)
+        {
+            //récupération du nombre de places dans l'avion
+            var planeCapacity = flight.getPlane_id().getCapacity();
+            //récupération du nombre de réservations sur ce vol
+            List<Reservation> reservationsFlight = repository.findByFlights(flight.getNumber());//récupération de la liste de réserv sur ce vol
+            var nbPlacesReservees = (reservationsFlight != null) ? reservationsFlight.size() : 0;//s'il n'y a pas de réservations au moins ça me fera pas d'erreur
+
+            if(nbPlacesReservees >= planeCapacity)//si le nombre de réservations est supérieur ou égales à la capacité de l'avion
+                return Response.status(400).build();//il faut que le message soit plus excplicite
+            else {
+                reservation.setFlight_id(flight);//Association d'un vol à la réservation
+                reservation.setPassenger_id(passenger);//Association d'un passager à la réservation
+                try{
+                    repository.persistAndFlush(reservation);
+                    return Response.status(201).build();
+                }catch (PersistenceException e){
+                    return Response.serverError().entity(new ErrorWrapper(e.getMessage())).build();
+                }
             }
         }else{
             return Response.status(400).build();//mettre un vrai message d'erreur

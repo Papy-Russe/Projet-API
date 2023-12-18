@@ -1,7 +1,9 @@
 package fr.unilasalle.flight.api.resources;
 
+import fr.unilasalle.flight.api.beans.Reservation;
 import fr.unilasalle.flight.api.beans.Vol;
 import fr.unilasalle.flight.api.repository.AvionRepository;
+import fr.unilasalle.flight.api.repository.ReservationRepository;
 import fr.unilasalle.flight.api.repository.VolsRepository;
 import jakarta.inject.Inject;
 import jakarta.persistence.PersistenceException;
@@ -25,6 +27,9 @@ public class VolsRessources extends GenericResources{
 
     @Inject
     private AvionRepository avionRepository;
+
+    @Inject
+    private ReservationRepository reservationRepository;
 
     @Inject
     Validator validator;
@@ -95,6 +100,11 @@ public class VolsRessources extends GenericResources{
         if(verifExistenceFlight != null)//si vol trouvé
             try
             {
+                List<Reservation> reservationsFlight = reservationRepository.findByFlights(verifExistenceFlight.getNumber());//récupération de toutes les réservations
+                for (Reservation r:reservationsFlight)
+                    reservationRepository.deleteById(r.getId());//suppression de chaque réservation
+
+
                 repository.delete(verifExistenceFlight);//suppression du vol
                 return Response.status(200).build();//retour de la requête
             }
